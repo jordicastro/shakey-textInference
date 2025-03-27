@@ -25,6 +25,17 @@ def update_successor_map(window, successor_map, ngram) -> dict:
 
     return successor_map
 
+def write_successor_map(successor_map, ngram):
+    filepath = ""
+    if ngram == 2:
+        filepath='data/bigram/shakespeare_bigram.txt'
+    else:
+        filepath=f'data/{ngram}gram/shakespeare_{ngram}gram.txt'
+    
+    with open(filepath, 'w') as writer:
+        for key in successor_map:
+            writer.write(str(key) + ': ' + str(successor_map[key]) + '\n')
+
 def print_examples(successor_map, ngram):
 
     seed_words1 = ['romeo', 'and', 'juliet', 'by', 'william', 'shakespeare']
@@ -32,7 +43,7 @@ def print_examples(successor_map, ngram):
     seed_words3 = ['o', 'romeo', 'romeo', 'wherefore', 'art', 'thou']
     seed_words4 = ['a', 'pair', 'of', 'star-crossed', 'lovers', 'take']
     seed_words5 = ['in', 'fair', 'verona', 'where', 'we', 'lay']
-    words = seed_words2[:ngram-1]
+    words = seed_words1[:ngram-1]
 
     print("WORDS: ", words)
 
@@ -87,7 +98,7 @@ def main():
 
             successor_map = update_successor_map(window, successor_map, ngram)
 
-
+    write_successor_map(successor_map, ngram)
 
     print_examples(successor_map, ngram)
 
