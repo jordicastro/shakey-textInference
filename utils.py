@@ -1,0 +1,145 @@
+"""
+utils.py
+
+Utility functions for text processing and n-gram generation
+"""
+
+import random
+import ast
+import json
+
+def tokenize(filename, ngram=2, successor_map=None) -> dict:
+    reader = open(filename)
+    lines = reader.readlines()
+    reader.close()
+    
+    punctuation = '.;,-“’”:?—‘!()_[]='
+
+    if successor_map is None:
+        successor_map = {}
+    
+    window = []
+
+    for line in lines:
+        for word in line.split():
+            cleaned_word = word.strip(punctuation).lower()
+            window.append(cleaned_word)
+
+            successor_map = update_successor_map(window, successor_map, ngram)
+
+    return successor_map
+
+def update_successor_map(window, successor_map, ngram) -> dict:
+    if ngram == 2:
+        if len(window) == 2:
+            if window[0] not in successor_map: # first instance of key and value
+                successor_map[window[0]] = [(window[1], 1)]
+            else:
+                # second instance of key and value
+                for i, (word, freq) in enumerate(successor_map[window[0]]):
+                    if word == window[1]:
+                        successor_map[window[0]][i] = (word, freq + 1)
+                        break
+                else: # second instance of key but new value
+                    successor_map[window[0]].append((window[1], 1))
+            window.pop(0)
+    else:
+        if len(window) == ngram:
+            key = tuple(window[:-1])
+            value = window[-1]
+            if key not in successor_map: # first instance of key and value
+                successor_map[key] = [(value, 1)]
+            else:
+                # second instance of key and value
+                for i, (word, freq) in enumerate(successor_map[key]):
+                    if word == value:
+                        successor_map[key][i] = (word, freq + 1)
+                        break
+                else: # second instance of key but new value
+                    successor_map[key].append((value, 1))
+            window.pop(0)
+    return successor_map
+
+def write_successor_map(successor_map, ngram, action='w', extension='json'): # write 'w', append 'a'
+    filepath = ""
+    if ngram == 2:
+        filepath=f'data/grams/_bigram/shakespeare_bigram.{extension}'
+    else:
+        filepath=f'data/grams/{ngram}gram/shakespeare_{ngram}gram.{extension}'
+
+    serializable_map = {str(key): value for key, value in successor_map.items()} 
+
+    
+    with open(filepath, 'w') as writer:
+        json.dump(serializable_map, writer)
+
+def load_successor_map(ngram):
+    filepath = ""
+    if ngram == 2:
+        filepath = 'data/grams/_bigram/shakespeare_bigram.json'
+    else:
+        filepath = f'data/grams/{ngram}gram/shakespeare_{ngram}gram.json'
+    
+    with open(filepath, 'r') as reader:
+        serializable_map = json.load(reader) 
+    
+    # convert string keys back to tuples
+    if ngram == 2:
+        successor_map = serializable_map
+    else:
+        successor_map = {ast.literal_eval(key): value for key, value in serializable_map.items()}
+    print("Loaded successor map from file")
+    print("Successor map size: ", len(successor_map))
+    return successor_map
+
+def weighted_random_choice(successors):
+    words, weights = zip(*successors)
+    return random.choices(words, weights=weights, k=1)[0]
+
+
+def print_examples(successor_map, ngram):
+
+    seed_words1 = ['romeo', 'and', 'juliet', 'by', 'william', 'shakespeare']
+    seed_words2 = ['thus', 'with', 'a', 'kiss', 'i', 'die']
+    seed_words3 = ['o', 'romeo', 'romeo', 'wherefore', 'art', 'thou']
+    seed_words4 = ['a', 'pair', 'of', 'star-crossed', 'lovers', 'take']
+    seed_words5 = ['in', 'fair', 'verona', 'where', 'we', 'lay']
+    words = seed_words1[:ngram-1]
+
+    print("WORDS: ", words)
+
+    if ngram == 2:
+        if words[0] in successor_map:
+            print("SUCCESSOR MAP: ", successor_map[words[0]])
+            print("WEIGHTED CHOICE: ", weighted_random_choice(successor_map[words[0]]))
+    elif ngram >= 3:
+        key = tuple(words)
+        if key in successor_map:
+            print("SUCCESSOR MAP: ", successor_map[key])
+            print("WEIGHTED CHOICE: ", random.choice(successor_map[key]))
+        else:
+            print("Key not found")
+
+    print("------------------")
+    isFirstWord = True
+
+    for i in range(50):
+        if ngram == 2:
+            if isFirstWord:
+                print(words[0], end=' ')
+                isFirstWord = False
+            else:
+                print(words[0], end=' ')
+            next_word = weighted_random_choice(successor_map[words[0]])
+            words[0] = next_word
+        elif ngram >= 3:
+            print(words[0], end=' ')
+            key = tuple(words)
+            if key in successor_map:
+                next_word, freq = random.choice(successor_map[key])
+                words.pop(0)
+                words.append(next_word)
+            else:
+                print("Key not found")
+                break
+    print("\n----------------")
