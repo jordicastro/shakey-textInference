@@ -8,6 +8,12 @@ import random
 import ast
 import json
 
+RED = '\033[91m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+BLUE = '\033[94m'
+RESET = '\033[0m'
+
 def tokenize(filename, ngram=2, successor_map=None) -> dict:
     reader = open(filename)
     lines = reader.readlines()
@@ -88,8 +94,8 @@ def load_successor_map(ngram):
         successor_map = serializable_map
     else:
         successor_map = {ast.literal_eval(key): value for key, value in serializable_map.items()}
-    print("Loaded successor map from file")
-    print("Successor map size: ", len(successor_map))
+    print("\tLoaded successor map from file")
+    print("\t\tSuccessor map size: ", len(successor_map))
     return successor_map
 
 def weighted_random_choice(successors):
@@ -99,44 +105,77 @@ def weighted_random_choice(successors):
 
 def print_examples(successor_map, ngram):
 
+    # romeo and juliet
     seed_words1 = ['romeo', 'and', 'juliet', 'by', 'william', 'shakespeare']
     seed_words2 = ['thus', 'with', 'a', 'kiss', 'i', 'die']
     seed_words3 = ['o', 'romeo', 'romeo', 'wherefore', 'art', 'thou']
     seed_words4 = ['a', 'pair', 'of', 'star-crossed', 'lovers', 'take']
     seed_words5 = ['in', 'fair', 'verona', 'where', 'we', 'lay']
-    words = seed_words1[:ngram-1]
+
+    # hamlet
+    seed_words6 = ['to', 'be', 'or', 'not', 'to', 'be']
+
+
+    # macbeth
+    seed_words7 = ['fair', 'is', 'foul', 'and', 'foul', 'is', 'fair']
+    seed_words8 = ["what's", 'done', 'cannot', 'be', 'undone', '--to' ]
+
+    # king lear
+    seed_words9 = ['when', 'we', 'are', 'born', 'we', 'cry']
+
+    # henry iv part 1
+    seed_words10 = ['the', 'king', 'hath', 'many', 'marching', 'in']
+
+    # twelfth night
+    seed_words11 = ['if', 'music', 'be', 'the', 'food', 'of', 'love']
+
+    # a midsummer night's dream
+    seed_words12 = ['love', 'looks', 'not', 'with', 'the', 'eyes']
+
+    # much ado about nothing
+    seed_words13 = ['some', 'cupid', 'kills', 'with', 'arrows', 'some']
+
+    # othello
+    seed_words14 = ['men', 'in', 'rage', 'strike', 'those', 'that']
+
+    # the tempest
+    seed_words15 = ["'hell", 'is', 'empty', 'and', 'all', 'the']
+
+    
+    words = seed_words11[:ngram-1]
 
     print("WORDS: ", words)
 
     if ngram == 2:
         if words[0] in successor_map:
-            print("SUCCESSOR MAP: ", successor_map[words[0]])
+            print(f"SUCCESSOR MAP 10/{len(successor_map[words[0]])}: ", successor_map[words[0]][:10], "...")
             print("WEIGHTED CHOICE: ", weighted_random_choice(successor_map[words[0]]))
     elif ngram >= 3:
         key = tuple(words)
         if key in successor_map:
             print("SUCCESSOR MAP: ", successor_map[key])
-            print("WEIGHTED CHOICE: ", random.choice(successor_map[key]))
+            print("WEIGHTED CHOICE: ", weighted_random_choice(successor_map[key]))
         else:
             print("Key not found")
 
-    print("------------------")
-    isFirstWord = True
+    print("----------------")
 
-    for i in range(50):
+    for i in range(50): 
         if ngram == 2:
-            if isFirstWord:
-                print(words[0], end=' ')
-                isFirstWord = False
+            if i < ngram - 1:
+                print(f"{RED}{words[0]}{RESET}", end=' ')
             else:
                 print(words[0], end=' ')
             next_word = weighted_random_choice(successor_map[words[0]])
             words[0] = next_word
         elif ngram >= 3:
-            print(words[0], end=' ')
+            if i < ngram - 1:
+                print(f"{RED}{words[0]}{RESET}", end=' ')
+            else:
+                print(words[0], end=' ')
             key = tuple(words)
             if key in successor_map:
-                next_word, freq = random.choice(successor_map[key])
+                next_word = weighted_random_choice(successor_map[key])
                 words.pop(0)
                 words.append(next_word)
             else:

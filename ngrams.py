@@ -15,15 +15,19 @@ def main():
         if len(sys.argv) > 2:
             filename = sys.argv[2]
 
+
     # ADD new key-terms from new corpus to existing successor map
     # 1. load existing successor map
-    successor_map = load_successor_map(ngram)
+    # successor_map = load_successor_map(ngram) # comment this if you want to create a new successor map
     # 2. tokenize new corpus using existing successor map
-    successor_map = tokenize(filename=filename, ngram=ngram, successor_map=successor_map)
+    # successor_map = tokenize(filename=filename, ngram=ngram, successor_map=successor_map)
     # 3. write new successor map to file
-    write_successor_map(successor_map, ngram, 'w', 'json')
-    # 4. print examples from both corpora
-    # print_examples(successor_map, ngram)
+    # write_successor_map(successor_map, ngram, 'w', 'json')
+
+
+    # load existing successor map and test it
+    successor_map = load_successor_map(ngram)
+    print_examples(successor_map, ngram)
 
 if __name__ == "__main__":
     main()
