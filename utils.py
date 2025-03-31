@@ -7,6 +7,7 @@ Utility functions for text processing and n-gram generation
 import random
 import ast
 import json
+import time
 
 RED = '\033[91m'
 GREEN = '\033[92m'
@@ -80,6 +81,7 @@ def write_successor_map(successor_map, ngram, action='w', extension='json'): # w
         json.dump(serializable_map, writer)
 
 def load_successor_map(ngram):
+    tick = time.time()
     filepath = ""
     if ngram == 2:
         filepath = 'data/grams/_bigram/shakespeare_bigram.json'
@@ -94,7 +96,8 @@ def load_successor_map(ngram):
         successor_map = serializable_map
     else:
         successor_map = {ast.literal_eval(key): value for key, value in serializable_map.items()}
-    print("\tLoaded successor map from file")
+    tock = time.time() - tick
+    print(f"\tLoaded successor map from file in: {tock:.2f}s")
     print("\t\tSuccessor map size: ", len(successor_map))
     return successor_map
 
@@ -159,7 +162,6 @@ def print_examples(successor_map, ngram):
             print("Key not found")
 
     print("----------------")
-
     for i in range(50): 
         if ngram == 2:
             if i < ngram - 1:
@@ -182,3 +184,31 @@ def print_examples(successor_map, ngram):
                 print("Key not found")
                 break
     print("\n----------------")
+
+def query_inference(successor_map, ngram, num_prediction_words, context) -> str:
+    context = context.split()  # list of words
+    result = " ".join(context) + " "  # start the result with the initial context
+    print(f"context[0]: {context[0]}")
+    print(f"ngram: {ngram}")
+    print(f"num_prediction_words: {num_prediction_words}")
+
+    for i in range(num_prediction_words): # 50 prediction words
+
+        if ngram == 2:
+            if context[0] in successor_map:
+                next_word = weighted_random_choice(successor_map[context[0]])
+                result += f"{next_word} "
+                context[0] = next_word
+            else:
+                break
+        elif ngram >= 3:
+            key = tuple(context[-(ngram - 1):])  # use the last (ngram - 1) words as the context
+            if key in successor_map:
+                next_word = weighted_random_choice(successor_map[key])
+                result += f"{next_word} "
+                context.append(next_word)  
+                context.pop(0)  
+            else:
+                break
+
+    return result

@@ -1,6 +1,5 @@
 
 from collections import Counter
-import random
 
 import sys
 from utils import tokenize, write_successor_map, load_successor_map, print_examples
