@@ -10,11 +10,14 @@ def main() -> str:
         num_prediction_words = int(sys.argv[2])
         context = sys.argv[3]
 
-
-    successor_map = load_successor_map(ngram)
-    result:str = query_inference(successor_map, ngram, num_prediction_words, context)
-    print(result)
-    return result
+    if len(context) < ngram - 1:
+        print("ERROR: context is too short for the n-gram model")
+        return "ERROR: context is too short for the n-gram model"
+    else:
+        successor_map = load_successor_map(ngram, debug=False)
+        result:str = query_inference(successor_map, ngram, num_prediction_words, context)
+        print(result)
+        return result
         
 if __name__ == "__main__":
     main()

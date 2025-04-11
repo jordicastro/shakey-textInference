@@ -67,7 +67,7 @@ def update_successor_map(window, successor_map, ngram) -> dict:
             window.pop(0)
     return successor_map
 
-def write_successor_map(successor_map, ngram, action='w', extension='json'): # write 'w', append 'a'
+def write_successor_map(successor_map, ngram, action='w', extension='json'):
     filepath = ""
     if ngram == 2:
         filepath=f'data/grams/_bigram/shakespeare_bigram.{extension}'
@@ -80,7 +80,7 @@ def write_successor_map(successor_map, ngram, action='w', extension='json'): # w
     with open(filepath, 'w') as writer:
         json.dump(serializable_map, writer)
 
-def load_successor_map(ngram):
+def load_successor_map(ngram, debug=True):
     tick = time.time()
     filepath = ""
     if ngram == 2:
@@ -97,8 +97,11 @@ def load_successor_map(ngram):
     else:
         successor_map = {ast.literal_eval(key): value for key, value in serializable_map.items()}
     tock = time.time() - tick
-    print(f"\tLoaded successor map from file in: {tock:.2f}s")
-    print("\t\tSuccessor map size: ", len(successor_map))
+    if debug:
+        print(f"\tLoaded successor map from file in: {tock:.2f}s")
+        print("\t\tSuccessor map size: ", len(successor_map))
+    else:
+        print(f"{tock:.2f}")
     return successor_map
 
 def weighted_random_choice(successors):
@@ -144,20 +147,28 @@ def print_examples(successor_map, ngram):
     # the tempest
     seed_words15 = ["'hell", 'is', 'empty', 'and', 'all', 'the']
 
+    # --
+
+    # richard II (corpus 19)
+    seed_words16 = ['brought', 'hither', 'henry', 'hereford', 'thy', 'bold']
+
+    # henry V (corpus 20)
+    seed_words17 = ['o', 'for', 'a', 'muse', 'of', 'fire']
+
     
-    words = seed_words11[:ngram-1]
+    words = seed_words17[:ngram-1]
 
     print("WORDS: ", words)
 
     if ngram == 2:
         if words[0] in successor_map:
             print(f"SUCCESSOR MAP 10/{len(successor_map[words[0]])}: ", successor_map[words[0]][:10], "...")
-            print("WEIGHTED CHOICE: ", weighted_random_choice(successor_map[words[0]]))
+            # print("WEIGHTED CHOICE: ", weighted_random_choice(successor_map[words[0]]))
     elif ngram >= 3:
         key = tuple(words)
         if key in successor_map:
             print("SUCCESSOR MAP: ", successor_map[key])
-            print("WEIGHTED CHOICE: ", weighted_random_choice(successor_map[key]))
+            # print("WEIGHTED CHOICE: ", weighted_random_choice(successor_map[key]))
         else:
             print("Key not found")
 
@@ -186,11 +197,10 @@ def print_examples(successor_map, ngram):
     print("\n----------------")
 
 def query_inference(successor_map, ngram, num_prediction_words, context) -> str:
+    if len(context) < ngram - 1:
+        return "ERROR: context is too short for the n-gram model"
     context = context.split()  # list of words
     result = " ".join(context) + " "  # start the result with the initial context
-    print(f"context[0]: {context[0]}")
-    print(f"ngram: {ngram}")
-    print(f"num_prediction_words: {num_prediction_words}")
 
     for i in range(num_prediction_words): # 50 prediction words
 
