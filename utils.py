@@ -221,9 +221,18 @@ def print_examples(successor_map, ngram):
 
 def query_inference(successor_map, ngram, num_prediction_words, context) -> str:
     if len(context) < ngram - 1:
-        return "ERROR: context is too short for the n-gram model"
+        return "ERROR: context is too short for the {ngram}-gram model"
     context = context.split()  # list of words
     result = " ".join(context) + " "  # start the result with the initial context
+
+    # check if context EXISTS in successor_map
+    if ngram == 2:
+        if context[0] not in successor_map:
+            return "ERROR: context is not in successor_map"
+    elif ngram >= 3:
+        key = tuple(context[:ngram - 1])
+        if key not in successor_map:
+            return "ERROR: context is not in successor_map"
 
     for i in range(num_prediction_words): # 50 prediction words
 

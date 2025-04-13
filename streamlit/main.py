@@ -24,13 +24,71 @@ if "context" not in st.session_state:
     st.session_state.context = ""
 if "generated_text" not in st.session_state:
     st.session_state.generated_text = ""
+if "inference_time" not in st.session_state:
+    st.session_state.inference_time = ""
+
+def run_inference_model():
+    st.session_state.context = st.session_state.context.strip() # ensure it counts words and not whitespace
+    # print('context:', st.session_state.context.split(), "length:", len(st.session_state.context.split()))
+    # print('ngrams:', st.session_state.ngrams, "length:", len(str(st.session_state.ngrams)))
+    if not st.session_state.context:
+        st.warning("Please enter some text in the context box.")
+    elif len(st.session_state.context.split()) < st.session_state.ngrams - 1:
+        st.warning(f"Please enter a context of at least {st.session_state.ngrams - 1} characters.")
+    else:
+        st.session_state.context = st.session_state.context
+        st.session_state.ngrams = st.session_state.ngrams
+        st.session_state.num_prediction_words = st.session_state.num_prediction_words
+
+            
+        # f'## Context: `{st.session_state.context}`'
+        # f'## N-Grams: `{st.session_state.ngrams}`'
+        # f'## Prediction Words: `{st.session_state.num_prediction_words}`'
+
+        ### Run the model
+        # path: ../add_new_corpus.sh
+        # run the model
+        command = [
+            "bash",
+            "../query.sh",
+            str(st.session_state.ngrams),
+            str(st.session_state.num_prediction_words),
+            st.session_state.context
+        ]
+        with st.spinner("Generating...", show_time=True):
+            try:
+                # Run the shell command and capture the output
+                result = subprocess.run(command, capture_output=True, text=True, check=True)
+                output = result.stdout.strip("")  # Get the standard output
+                # get the time (the first line of the output)
+                time_taken = output.split("\n")[0]
+                output = output.split("\n")[1:]  # Get the rest of the output
+                output = "\n".join(output)  # Join the rest of the output
+                st.text_area(
+                    "generated_text",
+                    value = st.write_stream(stream_data(time_taken, output)),
+                    height=300,
+                    on_change=None,
+                    args=None,
+                )
+                st.session_state.generated_text = output
+                st.session_state.inference_time = time_taken
+                st.rerun()
+                # st.write_stream(stream_data(time_taken, output))
+                # st.markdown(f"### Time taken: {time_taken}")
+                # st.markdown(f"### Generated Text:\n{output}")
+            except subprocess.CalledProcessError as e:
+                st.error(f"Error running the query script: {e.stderr}")
+
+def on_text_change():
+    pass
 
 def stream_data(time_taken, output):
     for letter in time_taken:
         yield letter
         time.sleep(0.02)
     yield "\n"
-    time.sleep(0.05)
+    time.sleep(0.03)
     for word in output.split(" "):
         yield word + " "
         time.sleep(0.02)
@@ -88,7 +146,7 @@ f"num prediction words: `{st.session_state.num_prediction_words}`"
 st.session_state.context = st.text_area(
     "context",
     height=300,
-    on_change=None,
+    on_change=on_text_change(),
     args=None,
     placeholder="Enter text...",
     label_visibility="hidden",
@@ -99,51 +157,9 @@ left, middle, right = st.columns(3)
 
 
 if middle.button("Generate", use_container_width=True):
-    st.session_state.context = st.session_state.context.strip()
-    if not st.session_state.context:
-        st.warning("Please enter some text in the context box.")
-    else:
-        st.session_state.context = st.session_state.context
-        st.session_state.ngrams = st.session_state.ngrams
-        st.session_state.num_prediction_words = st.session_state.num_prediction_words
-
-            
-        # f'## Context: `{st.session_state.context}`'
-        # f'## N-Grams: `{st.session_state.ngrams}`'
-        # f'## Prediction Words: `{st.session_state.num_prediction_words}`'
-
-        ### Run the model
-        # path: ../add_new_corpus.sh
-        # run the model
-        command = [
-            "bash",
-            "../query.sh",
-            str(st.session_state.ngrams),
-            str(st.session_state.num_prediction_words),
-            st.session_state.context
-        ]
-        with st.spinner("Generating...", show_time=True):
-            try:
-                # Run the shell command and capture the output
-                result = subprocess.run(command, capture_output=True, text=True, check=True)
-                output = result.stdout.strip("")  # Get the standard output
-                # get the time (the first line of the output)
-                time_taken = output.split("\n")[0]
-                output = output.split("\n")[1:]  # Get the rest of the output
-                output = "\n".join(output)  # Join the rest of the output
-                st.text_area(
-                    "generated_text",
-                    value = st.write_stream(stream_data(time_taken, output)),
-                    height=300,
-                    on_change=None,
-                    args=None,
-                )
-                st.session_state.generated_text = output
-                st.rerun()
-                # st.write_stream(stream_data(time_taken, output))
-                # st.markdown(f"### Time taken: {time_taken}")
-                # st.markdown(f"### Generated Text:\n{output}")
-            except subprocess.CalledProcessError as e:
-                st.error(f"Error running the query script: {e.stderr}")
+    run_inference_model()
 
 
+right.markdown(
+    f"`Inference Time: {st.session_state.inference_time}s`",
+)
