@@ -50,9 +50,11 @@ def run_inference_model():
         ### Run the model
         # path: ../add_new_corpus.sh
         # run the model
+        # fix: relative path
+        script_path = os.path.join(this_dir, "../query.sh")
         command = [
             "bash",
-            "../query.sh",
+            script_path,
             str(st.session_state.ngrams),
             str(st.session_state.num_prediction_words),
             st.session_state.context
