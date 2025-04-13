@@ -8,12 +8,15 @@ import random
 import ast
 import json
 import time
+import os
 
 RED = '\033[91m'
 GREEN = '\033[92m'
 YELLOW = '\033[93m'
 BLUE = '\033[94m'
 RESET = '\033[0m'
+
+base_dir = os.path.dirname(__file__)
 
 def tokenize(filename, ngram=2, successor_map=None) -> dict:
     reader = open(filename)
@@ -70,9 +73,11 @@ def update_successor_map(window, successor_map, ngram) -> dict:
 def write_successor_map(successor_map, ngram, action='w', extension='json'):
     filepath = ""
     if ngram == 2:
-        filepath=f'data/grams/_bigram/shakespeare_bigram.{extension}'
+        # filepath=f'data/grams/_bigram/shakespeare_bigram.{extension}'
+        filepath=os.path.join(base_dir, 'data', 'grams', '_bigram', f'shakespeare_bigram.{extension}')
     else:
-        filepath=f'data/grams/{ngram}gram/shakespeare_{ngram}gram.{extension}'
+        # filepath=f'data/grams/{ngram}gram/shakespeare_{ngram}gram.{extension}'
+        filepath=os.path.join(base_dir, 'data', 'grams', f'{ngram}gram', f'shakespeare_{ngram}gram.{extension}')
 
     serializable_map = {str(key): value for key, value in successor_map.items()} 
 
@@ -84,9 +89,11 @@ def load_successor_map(ngram, debug=True):
     tick = time.time()
     filepath = ""
     if ngram == 2:
-        filepath = 'data/grams/_bigram/shakespeare_bigram.json'
+        # filepath = 'data/grams/_bigram/shakespeare_bigram.json'
+        filepath = os.path.join(base_dir, 'data', 'grams', '_bigram', 'shakespeare_bigram.json')
     else:
-        filepath = f'data/grams/{ngram}gram/shakespeare_{ngram}gram.json'
+        # filepath = f'data/grams/{ngram}gram/shakespeare_{ngram}gram.json'
+        filepath = os.path.join(base_dir, 'data', 'grams', f'{ngram}gram', f'shakespeare_{ngram}gram.json')
     
     with open(filepath, 'r') as reader:
         serializable_map = json.load(reader) 
@@ -103,6 +110,13 @@ def load_successor_map(ngram, debug=True):
     else:
         print(f"{tock:.2f}")
     return successor_map
+
+def load_test_quotes():
+    filepath = os.path.join(base_dir, 'data', 'testing', 'quotes.json')  # adjust path from utils.py
+    with open(filepath, 'r') as reader:
+        quotes = json.load(reader)
+    return quotes
+
 
 def weighted_random_choice(successors):
     words, weights = zip(*successors)
@@ -222,3 +236,44 @@ def query_inference(successor_map, ngram, num_prediction_words, context) -> str:
                 break
 
     return result
+
+
+def top_k_successors(successor_map, context, k=5):
+
+    if len(context) < 1:
+        raise ValueError("Context must be at least 1 word long")
+    
+    if len(context) == 1:
+        context = context[0]
+    elif len(context) > 1:
+        context = tuple(context)
+    
+    if context not in successor_map:
+        return []
+    
+    successors = successor_map[context]
+    successors.sort(key=lambda x: x[1], reverse=True) 
+    return successors[:k] 
+
+def update_metrics(guesses, target, TP, FP, FN):
+    guess_words = [guess[0] for guess in guesses]
+    print(f"\n\nTarget: {target}, Guesses: {guess_words}\n\n")
+    if target in guess_words:
+        TP += 1
+    else:
+        FN += 1
+
+    for guess in guesses:
+        if guess != target:
+            FP += 1
+
+    return TP, FP, FN
+
+def evaluate_metrics(TP, FP, FN):
+    precision = TP / (TP + FP) if (TP + FP) > 0 else 0
+    recall = TP / (TP + FN) if (TP + FN) > 0 else 0
+    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    accuracy = TP / (TP + FP + FN) if (TP + FP + FN) > 0 else 0
+
+    print(f"Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}, Accuracy: {accuracy:.4f}")
+    return precision, recall, f1, accuracy
