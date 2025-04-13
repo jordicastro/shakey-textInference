@@ -12,12 +12,12 @@ import matplotlib.pyplot as plt
 #     - paper
 #     - github link
 #     - powerpoint (maybe in github or separate .pptx file)
-
-favicon = os.path.join(os.getcwd(), "assets", "favicon.ico")
-logo = os.path.join(os.getcwd(), "assets", "logo.png")
-logo_sm = os.path.join(os.getcwd(), "assets", "logo_sm.png")
-logo_md = os.path.join(os.getcwd(), "assets", "logo_md.png")
-logo_lg = os.path.join(os.getcwd(), "assets", "logo_lg.png")
+this_dir = os.path.dirname(__file__)
+favicon = os.path.join(this_dir, "assets", "favicon.ico")
+logo = os.path.join(this_dir, "assets", "logo.png")
+logo_sm = os.path.join(this_dir, "assets", "logo_sm.png")
+logo_md = os.path.join(this_dir, "assets", "logo_md.png")
+logo_lg = os.path.join(this_dir, "assets", "logo_lg.png")
 
 st.set_page_config(
     page_title="Shakey - Evaluation Metrics",
