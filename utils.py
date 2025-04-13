@@ -15,6 +15,14 @@ GREEN = '\033[92m'
 YELLOW = '\033[93m'
 BLUE = '\033[94m'
 RESET = '\033[0m'
+BLACK = '\033[30m'
+
+LIGHT_RED = '\033[91m'
+LIGHT_GREEN = '\033[92m'
+LIGHT_BLUE = '\033[94m'
+LIGHT_YELLOW = '\033[93m'
+LIGHT_MAGENTA = '\033[95m'
+LIGHT_CYAN = '\033[96m'
 
 base_dir = os.path.dirname(__file__)
 
@@ -108,7 +116,8 @@ def load_successor_map(ngram, debug=True):
         print(f"\tLoaded successor map from file in: {tock:.2f}s")
         print("\t\tSuccessor map size: ", len(successor_map))
     else:
-        print(f"{tock:.2f}")
+        # pass
+        print(f"{tock:.2f}") # DEBUG
     return successor_map
 
 def load_test_quotes():
@@ -257,11 +266,13 @@ def top_k_successors(successor_map, context, k=5):
 
 def update_metrics(guesses, target, TP, FP, FN):
     guess_words = [guess[0] for guess in guesses]
-    print(f"\n\nTarget: {target}, Guesses: {guess_words}\n\n")
+
     if target in guess_words:
         TP += 1
+        # print(f"Target: {target}, Guesses: {guess_words}", f"{GREEN}Target found{RESET}") # DEBUG 
     else:
         FN += 1
+        # print(f"Target: {target}, Guesses: {guess_words}", f"{RED}Target not found{RESET}") # DEBUG
 
     for guess in guesses:
         if guess != target:
@@ -269,11 +280,27 @@ def update_metrics(guesses, target, TP, FP, FN):
 
     return TP, FP, FN
 
-def evaluate_metrics(TP, FP, FN):
+def choose_color(ngram):
+    colors = [(LIGHT_RED, 2), (LIGHT_GREEN, 3), (LIGHT_BLUE, 4), (LIGHT_YELLOW, 5), (LIGHT_MAGENTA, 6), (LIGHT_CYAN, 7)]
+    for color, n in colors:
+        if ngram == n:
+            return color
+    return LIGHT_RED
+
+def evaluate_metrics(TP, FP, FN, ngram):
+
     precision = TP / (TP + FP) if (TP + FP) > 0 else 0
     recall = TP / (TP + FN) if (TP + FN) > 0 else 0
     f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
     accuracy = TP / (TP + FP + FN) if (TP + FP + FN) > 0 else 0
 
-    print(f"Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}, Accuracy: {accuracy:.4f}")
+    title_color = choose_color(ngram)
+    if ngram == 2:
+        ngram = "bigram"
+    else:
+        ngram = f"{ngram}gram"
+
+    print(f"\n{title_color}Evaluation Metrics for {ngram}:{RESET}")
+    print(f"{BLACK}TP: {TP}, FP: {FP}, FN: {FN}{RESET}")
+    print(f"{BLUE}Precision:{RESET} {precision:.4f}, {YELLOW}Recall:{RESET} {recall:.4f}, {GREEN}F1:{RESET} {f1:.4f}, {RED}Accuracy:{RESET} {accuracy:.4f}\n")
     return precision, recall, f1, accuracy
