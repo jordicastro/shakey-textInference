@@ -1,12 +1,12 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from utils import load_successor_map, load_test_quotes, top_k_successors, update_metrics, evaluate_metrics
+from scripts.utils import load_successor_map, load_test_quotes, top_k_successors, update_metrics, evaluate_metrics
 
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python evalMetrics.py <ngram> <opt. k")
+        print("Usage: python evalMetrics.py <ngram> <opt. k>")
         return
     ngram = int(sys.argv[1])
     k = 3

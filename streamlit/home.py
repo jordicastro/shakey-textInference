@@ -51,7 +51,7 @@ def run_inference_model():
         # path: ../add_new_corpus.sh
         # run the model
         # fix: relative path
-        script_path = os.path.join(this_dir, "../query.sh")
+        script_path = os.path.join(this_dir, "../scripts/query.sh")
         command = [
             "bash",
             script_path,
