@@ -118,8 +118,7 @@ def load_successor_map(ngram, debug=True):
         print(f"\tLoaded successor map from file in: {tock:.2f}s")
         print("\t\tSuccessor map size: ", len(successor_map))
     else:
-        pass
-        # print(f"{tock:.2f}") # DEBUG
+        print(f"{tock:.2f}") # DEBUG
     return successor_map
 
 def load_test_quotes():
