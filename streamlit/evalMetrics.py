@@ -280,19 +280,21 @@ st.link_button(
     icon="🎨",
     disabled=False,
 )
-st.link_button(
-    label="Paper",
-    help="Coming Soon",
-    url="https://www.google.com",
-    type="tertiary",
-    icon="📄",
-    disabled=True,
-)
-st.link_button(
-    label="Powerpoint",
-    help="Coming Soon",
-    url="https://www.google.com",
-    type="tertiary",
-    icon="📊",
-    disabled=True,
-)
+
+with open("./assets/docs/Final_Text_Inference_Paper.pdf", "rb") as f:
+    st.download_button(
+        label="📄 Paper",
+        data=f,
+        file_name="Text_Inference_Paper_Castro.pdf",
+        mime="application/pdf",
+        type="tertiary",
+    )
+
+with open("./assets/docs/Final_Text_Inference_Presentation.pptx", "rb") as f:
+    st.download_button(
+        label="📊 Powerpoint",
+        data=f,
+        file_name="Text_Inference_Presentation_Castro.pptx",
+        mime="application/pdf",
+        type="tertiary",
+    )
