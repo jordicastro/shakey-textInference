@@ -24,6 +24,26 @@ N-grams 2–7 trained on 20 Shakespeare plays.
    streamlit run main.py
    ```
 
+## How to use the app
+1. Adjust the inference parameters
+    - **N-Grams**:
+    - each N-gram uses $N-1$ words to predict the next word.
+    - For example: 3-gram model:
+      - "To be" -> "or"
+        - uses the last two words to predict the next word.
+    - **Prediction Words**
+    - number of words to generate.
+      - the models will still only generate next word, but this process is repeated for however many words you choose. 
+2. Enter a quote in the large text area.
+3. Click the "Submit" button to generate the next word.
+
+Tips:
+- If you want quote retrieval, use N-grams 5-7.
+- If you want it to generalize Shakespeare language, use N-gram 3.
+
+*Note: Inference times are in ascending order of N-grams, and are longer on the streamlit app (locally offers better performance).*
+
+
 ## Training Plays
 
 | Play | Category |
