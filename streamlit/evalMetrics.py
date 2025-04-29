@@ -18,6 +18,8 @@ logo = os.path.join(this_dir, "assets", "logo.png")
 logo_sm = os.path.join(this_dir, "assets", "logo_sm.png")
 logo_md = os.path.join(this_dir, "assets", "logo_md.png")
 logo_lg = os.path.join(this_dir, "assets", "logo_lg.png")
+paper_path = os.path.join(this_dir, "assets", "docs", "Final_Text_Inference_Paper.pdf")
+presentation_path = os.path.join(this_dir, "assets", "docs", "Final_Text_Inference_Presentation.pptx")
 
 st.set_page_config(
     page_title="Shakey - Evaluation Metrics",
@@ -281,7 +283,7 @@ st.link_button(
     disabled=False,
 )
 
-with open("./assets/docs/Final_Text_Inference_Paper.pdf", "rb") as f:
+with open(paper_path, "rb") as f:
     st.download_button(
         label="📄 Paper",
         data=f,
@@ -290,7 +292,7 @@ with open("./assets/docs/Final_Text_Inference_Paper.pdf", "rb") as f:
         type="tertiary",
     )
 
-with open("./assets/docs/Final_Text_Inference_Presentation.pptx", "rb") as f:
+with open(presentation_path, "rb") as f:
     st.download_button(
         label="📊 Powerpoint",
         data=f,
